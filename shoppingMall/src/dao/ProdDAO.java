@@ -60,9 +60,9 @@ public class ProdDAO {
 //	
 //	
 	
-	public int buyOne() {
+	//public int buyOne() {
 		
-	}
+	//}
 	
 	
 	
