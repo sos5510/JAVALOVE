@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import service.AdminService;
+import service.FindService;
 import service.LoginService;
 import service.MemberService;
 import service.ProdService;
@@ -18,6 +20,8 @@ public class Controller {
 	MemberService memberService = MemberService.getInstance();
 	LoginService loginService = LoginService.getInstance();
 	ProdService prodService = ProdService.getInstance();
+	AdminService adminservice = AdminService.getInstance();
+	FindService findservice = FindService.getInstance();
 	
 	// Controller 객체 생성
 	public static Controller controller = new Controller();
@@ -36,7 +40,7 @@ public class Controller {
 		int choice = Menu.HOME;
 		
 		while(true) {
-			switch(choice ) {
+			switch(choice) {
 			// 메인메뉴
 			case Menu.HOME :
 				choice = home();
@@ -67,9 +71,52 @@ public class Controller {
 			case Menu.BUY_PROD:
 				choice = prodService.main();
 				break;
+			
+			
+			case Menu.MEMBER_FIND:
+				choice = findservice.list();
+				break;
+			case Menu.MEMBER_FIND_ID:
+				choice = findservice.find_id();
+				break;
+			case Menu.MEMBER_FIND_PW:
+				choice = findservice.find_pw();
+				break;	
+				
+				
+		
+			case Menu.ADMIN_PAGE:
+				choice = adminservice.list();
+				break;
+			case Menu.ADMIN_MEMBER:
+				choice = adminservice.member();
+				break;
+			case Menu.ADMIN_PROD:
+				choice = adminservice.list();
+				break;
+			case Menu.ADMIN_CATEGORY:
+				choice = adminservice.list();
+				break;
+			case Menu.ADMIN_SALES:
+				choice = adminservice.list();
+				break;
+			
+				
+			case Menu.ADMIN_EMPOWERMENT:
+				choice = adminservice.empowerment();
+				break;
+			case  Menu.ADMIN_MODIFY:
+				choice = adminservice.modify();
+				break;
+	      	case Menu.ADMIN_FULL:
+				choice =adminservice.full();
+				break;
+			case Menu.ADMIN_PERSONAL:
+				choice =adminservice.mem_p();
+				break;
+						
 			}
 		}
-		
 	}
 	
 	

@@ -14,7 +14,24 @@ public interface Menu {
 	int MEMBER_BUYHISTORY = 17;
 	
 	
-	int ADMIN_PAGE = 23;
+	int MEMBER_FIND_ID =111;
+	int MEMBER_FIND_PW =112;
+	
+	int ADMIN_PAGE = 20;
+	
+	int ADMIN_MEMBER =21; //회원관리
+	int ADMIN_PERSONAL =211; //개인
+	int ADMIN_FULL= 212; //전체
+	
+	
+	int ADMIN_EMPOWERMENT=2111;
+	int ADMIN_MODIFY=2112;
+	
+	
+	int ADMIN_PROD = 22;
+	int ADMIN_CATEGORY = 23;
+	int ADMIN_SALES = 24;
+	
 	
 	
 	

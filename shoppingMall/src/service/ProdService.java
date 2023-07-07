@@ -49,8 +49,8 @@ public class ProdService {
 				item = ScanUtil.nextInt();
 				System.out.print("몇개를 구매하시겠습니까? : ");
 				qty = ScanUtil.nextInt();
-//				dao.buyThis(item, qty);
-				dao.buyOne();
+			//	dao.buyThis(list, item, qty);
+//				dao.buyOne();
 				break;
 			case 2:
 				System.out.print("몇번 품목을 장바구니에 담으시겠습니까? : ");

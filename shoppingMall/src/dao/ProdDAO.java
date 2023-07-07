@@ -50,19 +50,24 @@ public class ProdDAO {
 		
 	}
 
-//	public int buyThis(int result) {
+//	public int buyThis(List<LinkedHashMap<String,Object>> list, int item, int qty){
+//		
 //		
 //		
 //	}
+		
+		
+	}
 //	public int addCartThis(int result) {
 //		String sql = "INSERT INTO CART "
 //	}
 //	
 //	
 	
-	public int buyOne() {
-		
-	}
+//	public int buyOne() {
+//		String sql = "UPDATE ";
+//		
+//	}
 	
 	
 	
@@ -74,4 +79,4 @@ public class ProdDAO {
 	
 	
 	
-}
+
