@@ -6,22 +6,32 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class JDBCUtil {
-
-	// 싱글톤패턴
-	private static JDBCUtil instance = null;
-	private JDBCUtil() {};
+	/*
+	 * JDBC를 좀 더 쉽고 편하게 사용하기 위한 Utility 클래스로 다음 메서가 구
+	 * 
+	 * Map<String, Object> selectOne(String sql)
+	 * Map<String, Object> selectOne(String sql, List<Object> param)
+	 * List<Map<String, Object>> selectList(String sql)
+	 * List<Map<String, Object>> selectList(String sql, List<Object> param)
+	 * int update(String sql)
+	 * int update(String sql, List<Object> param)
+	 * 
+	 * */	
+	// 싱글톤 패턴 : 인스턴스의 생성을 제한하여 하나의 인스턴스만 사용하는 디자인 패턴	
+	private static JDBCUtil instance=null;
+	private JDBCUtil() {}
 	public static JDBCUtil getInstance() {
-		if(instance == null)instance = new JDBCUtil();
+		if (instance==null) instance=new JDBCUtil();
 		return instance;
 	}
+	
+	private final String URL="jdbc:oracle:thin:@192.168.40.49:1521:xe";
 	/* DBMS 접속시 사용되는 방식
 	 *   - thin, OCI
 	 *   1) thin 방식
@@ -32,216 +42,208 @@ public class JDBCUtil {
 	 *     . 각 하드웨어/소프트웨어(O/S) 별로 전용의 DB연결 프로그램을 OCI라 한다.
 	 *     . 하드웨어 또는 소프트웨어 전용의 Module을 사용하여 thin보다 속도가 빠르다.
 	 */
-	private final String url = "jdbc:oracle:thin:@192.168.145.24:1521:xe";
-	private final String user = "PROJECT11";
-	private final String password = "JAVA";
+	private final String USER = "SEM";
+	private final String PASSWORD = "java";
 	
 	private Connection conn = null;
 	private ResultSet rs = null;
-	private PreparedStatement pstmt= null;
-	private Statement stmt= null;
+	private PreparedStatement ps = null;
 	
-	public List<LinkedHashMap<String,Object>> selectList(String sql, List<Object> param){
-		
-		List<LinkedHashMap<String,Object>> resultSet  = null;
-		LinkedHashMap<String,Object> row = null;
+	public List<Map<String, Object>> selectList(String sql, List<Object> param){
+		// sql => "SELECT * FROM MEMBER WHERE MEM_ADD1 LIKE '%'||?||'%'"
+		// sql => "SELECT * FROM JAVA_BOARD WHERE WRITER=?"
+		// sql => "SELECT * FROM JAVA_BOARD WHERE BOARD_NUM > ?"
+		List<Map<String, Object>> result = null;
 		try {
-			conn = DriverManager.getConnection(url, user, password);
-			pstmt = conn.prepareStatement(sql);
-			for(int i = 0; i<= param.size(); i++) {
-				pstmt.setObject(i+1, param.get(i));
-			}
-			rs = pstmt.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int colCount = rsmd.getColumnCount();
-			
-			while(rs.next()) {
-				row = new LinkedHashMap<>();
-				if(resultSet == null) resultSet = new ArrayList<>();
-				for(int i = 1; i <= colCount; i++) {
-					String key = rsmd.getColumnLabel(i);
-					Object value = rs.getObject(i);
-					row.put(key, value);
-				}
-				resultSet.add(row);
-			}
-			
-		}catch(SQLException e) {
-			e.printStackTrace();
-		}finally {
-			if(rs!=null)try {rs.close();}catch(Exception e) {}
-			if(pstmt!=null)try {rs.close();}catch(Exception e) {}
-			if(conn!=null)try {rs.close();}catch(Exception e) {}
-		}
-		
-		
-		return resultSet;
-		
-	}
-	
-	public List<LinkedHashMap<String,Object>> selectList(String sql){
-		
-		List<LinkedHashMap<String,Object>> resultSet  = null;
-		LinkedHashMap<String, Object> row = null;
-		try {
-			conn = DriverManager.getConnection(url, user, password);
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int colCount = rsmd.getColumnCount();
-			resultSet = new ArrayList<LinkedHashMap<String,Object>>();
-			while(rs.next()) {
-				row = new LinkedHashMap<>();
-				if(resultSet == null) resultSet = new ArrayList<>();
-				for(int i = 1; i <= colCount; i++) {
-					String key = rsmd.getColumnLabel(i);
-					Object value = rs.getObject(i);
-					row.put(key, value);
-				}
-				resultSet.add(row);
-			}
-			
-		}catch(SQLException e) {
-			e.printStackTrace();
-		}finally {
-			if(rs!=null)try {rs.close();}catch(Exception e) {}
-			if(pstmt!=null)try {rs.close();}catch(Exception e) {}
-			if(conn!=null)try {rs.close();}catch(Exception e) {}
-		}
-		
-		return resultSet;
-		
-		
-	}
-	
-	public LinkedHashMap<String,Object> selectOne(String sql, List<Object> param){
-		
-		
-		LinkedHashMap<String,Object> row = null;
-		
-		try {
-			
-			conn = DriverManager.getConnection(url, user, password);
-			pstmt = conn.prepareStatement(sql);
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
 			for(int i = 0; i < param.size(); i++) {
-				pstmt.setObject(i+1, param.get(i));
+				ps.setObject(i + 1, param.get(i));
 			}
-			rs = pstmt.executeQuery();
-			
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int colCount = rsmd.getColumnCount();
-			
+			rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();//
+			int columnCount = rsmd.getColumnCount();//컬럼수 반환, getColumnName() : 컬럼이름 반환 
 			while(rs.next()) {
-				row = new LinkedHashMap<String,Object>();
-				for(int i = 1; i <= colCount; i++) {
-					String key = rsmd.getColumnLabel(i);
-					Object value = rs.getObject(i);
+				if(result == null) result = new ArrayList<>();
+				Map<String, Object> row = new HashMap<>();
+				for(int i = 1; i <= columnCount; i++) {
+					String key = rsmd.getColumnLabel(i);//컬럼 타이틀 반환 
+					Object value = rs.getObject(i);//형(type)을 알수 없어 Object로 설계 
 					row.put(key, value);
 				}
+				result.add(row);
 			}
 		}catch(SQLException e) {
 			e.printStackTrace();
 		}finally {
-			if(stmt != null) try { rs.close();}catch(Exception e) {}
-			if(pstmt != null) try { rs.close();}catch(Exception e) {}
-			if(rs != null) try { rs.close();}catch(Exception e) {}
-			if(conn != null) try { rs.close();}catch(Exception e) {}
+			if(rs != null) try { rs.close(); } catch(Exception e) {}
+			if(ps != null) try { ps.close(); } catch(Exception e) {}
+			if(conn != null) try { conn.close(); } catch(Exception e) {}
 		}
-		return row;
-		
+		return result;
 	}
 	
-	public LinkedHashMap<String,Object> selectOne(String sql){
-		
-		LinkedHashMap<String,Object> row = null;
-		
+	public int checkRemain(String sql) {
+		int result = 0;
 		try {
-			conn = DriverManager.getConnection(url, user, password);
-			pstmt = conn.prepareStatement(sql);
-			stmt = conn.createStatement();
-			rs = pstmt.executeQuery();
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			rs.next();
+			result = rs.getInt(1);
 			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) try {rs.close();} catch(Exception e) {}
+			if(ps != null) try {ps.close();} catch(Exception e) {}
+			if(conn != null) try {conn.close();} catch(Exception e) {}
+		}
+		return result;
+	}
+	
+	
+	public List<Map<String, Object>> selectList(String sql){
+		// sql => "SELECT * FROM MEMBER"
+		// sql => "SELECT * FROM JAVA_BOARD"
+		// sql => "SELECT * FROM JAVA_BOARD WHERE BOARD_NUM > 10"
+		List<Map<String, Object>> result = null;
+		try {
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
-			int colCount = rsmd.getColumnCount();
-			
+			int columnCount = rsmd.getColumnCount();
 			while(rs.next()) {
-				row = new  LinkedHashMap<String,Object>();
-				
-				for(int i = 1; i <= colCount; i++) {
-					// getColumnName vs getColumnLabel
-					// getColumnName : 원본 컬럼명을 가져옴
-					// getColumnLabel : as로 선언된 별명을 가져옴, 없으면 원본 컬럼명
+				if(result == null) result = new ArrayList<>();
+				Map<String, Object> row = new HashMap<>();
+				for(int i = 1; i <= columnCount; i++) {
 					String key = rsmd.getColumnLabel(i);
 					Object value = rs.getObject(i);
-					
 					row.put(key, value);
 				}
+				result.add(row);
 			}
-			
 		}catch(SQLException e) {
 			e.printStackTrace();
 		}finally {
-			if(rs!=null)try {rs.close();}catch(Exception e) {}
-			if(stmt!=null)try {stmt.close();}catch(Exception e) {}
-			if(pstmt!=null)try {pstmt.close();}catch(Exception e) {}
-			if(conn!=null)try {conn.close();}catch(Exception e) {}
+			if(rs != null) try { rs.close(); } catch(Exception e) {}
+			if(ps != null) try { ps.close(); } catch(Exception e) {}
+			if(conn != null) try { conn.close(); } catch(Exception e) {}
 		}
-		
-		return row;
-		
+		return result;
 	}
 	
 	public int update(String sql, List<Object> param) {
+		// sql => "DELETE FROM JAVA_BOARD WHERE BOARD_NUMBER=?"
+		// sql => "UPDATE JAVA_BOARD SET TITLE='하하' WHERE BOARD_NUMBER=?"
+		// sql => "INSERT MY_MEMBER (MEM_ID, MEM_PASS, MEM_NAME) VALUES (?, ?, ?)"
 		int result = 0;
-		
 		try {
-			conn = DriverManager.getConnection(url, user, password);
-			pstmt = conn.prepareStatement(sql);
-
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
 			for(int i = 0; i < param.size(); i++) {
-				pstmt.setObject(i + 1, param.get(i));
+				ps.setObject(i + 1, param.get(i));
 			}
-			
-			// result에 반영된 record 건수 반환(int)
-			result = pstmt.executeUpdate();
-			System.out.println(result);
-			
+			result = ps.executeUpdate();
 		}catch(SQLException e) {
 			e.printStackTrace();
 		}finally {
-			if(pstmt != null) try{rs.close();}catch(Exception e) {}
-			if(conn != null) try{conn.close();}catch(Exception e) {}
+			if(rs != null) try {  rs.close();  } catch (Exception e) { }
+			if(ps != null) try {  ps.close();  } catch (Exception e) { }
+			if(conn != null) try { conn.close(); } catch (Exception e) { }
 		}
-		
-		System.out.println("result : "+result);
 		return result;
 	}
-	 
+
 	public int update(String sql) {
+		// sql => "DELETE FROM JAVA_BOARD"
+		// sql => "UPDATE JAVA_BOARD SET TITLE='하하'"
+		// sql => "UPDATE JAVA_BOARD SET TITLE='하하' WHERE BOARD_NUMBER=1"
+		// sql => "INSERT MY_MEMBER (MEM_ID, MEM_PASS, MEM_NAME) VALUES ('admin', '1234', '홍길동')"
 		int result = 0;
+		try {
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
+			result = ps.executeUpdate();
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}finally {
+			if(rs != null) try {  rs.close();  } catch (Exception e) { }
+			if(ps != null) try {  ps.close();  } catch (Exception e) { }
+			if(conn != null) try { conn.close(); } catch (Exception e) { }
+		}
+		return result;
+	}
+	
+	public Map<String, Object> selectOne(String sql, List<Object> param){
+		// sql => "SELECT * FROM JAVA_BOARD WHERE BOARD_NUMBER=?"
+		// param => [1]
+		//
+		// sql => "SELECT * FROM JAVA_BOARD WHERE WRITER=? AND TITLE=?"
+		// param => ["홍길동", "안녕"]
+		Map<String, Object> row = null;
 		
 		try {
-			conn = DriverManager.getConnection(url, user, password);
-			pstmt = conn.prepareStatement(sql);
-
-			result = pstmt.executeUpdate();
-			
-			// result에 반영된 record 건수 반환(int)
-			result = pstmt.executeUpdate();
-			
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
+			for(int i = 0; i < param.size(); i++) {
+				ps.setObject(i + 1, param.get(i));
+			}
+			rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			while(rs.next()) {
+				row = new HashMap<>();
+				for(int i = 1; i <= columnCount; i++) {
+					String key = rsmd.getColumnLabel(i);
+					Object value = rs.getObject(i);
+					row.put(key,value);
+				}
+				// {DATETIME=2022-08-05 16:35:08.0, WRITER=홍길동, TITLE=안녕하세요, CONTENT=안녕안녕, BOARD_NUMBER=1}
+			}
 		}catch(SQLException e) {
 			e.printStackTrace();
 		}finally {
-			if(pstmt != null) try{rs.close();}catch(Exception e) {}
-			if(conn != null) try{conn.close();}catch(Exception e) {}
+			if(rs != null) try {  rs.close();  } catch (Exception e) { }
+			if(ps != null) try {  ps.close();  } catch (Exception e) { }
+			if(conn != null) try { conn.close(); } catch (Exception e) { }
 		}
 		
-		return result;
+		return row;
 	}
 	
-	
-	
-	
-	
-	
+	public Map<String, Object> selectOne(String sql){
+		// sql => "SELECT * FROM JAVA_BOARD 
+		//			WHERE BOARD_NUMBER=(SELECT MAX(BOARD_NUMBER) FROM JAVA_BOARD)"
+		// sql => "SELECT * FROM MEMBER MEM_ID='a001' AND MEM_PASS='123'"
+		Map<String, Object> row = null;
+		
+		try {
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			while(rs.next()) {
+				row = new HashMap<>();
+				for(int i = 1; i <= columnCount; i++) {
+					String key = rsmd.getColumnLabel(i);
+					// getColumnName vs getColumnLabel
+					// getColumnName : 원본 컬럼명을 가져옴
+					// getColumnLabel : as로 선언된 별명을 가져옴, 없으면 원본 컬럼명
+					Object value = rs.getObject(i);
+					row.put(key,value);
+				}
+			}
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}finally {
+			if(rs != null) try {  rs.close();  } catch (Exception e) { }
+			if(ps != null) try {  ps.close();  } catch (Exception e) { }
+			if(conn != null) try { conn.close(); } catch (Exception e) { }
+		}
+		
+		return row;
+	}
 }
