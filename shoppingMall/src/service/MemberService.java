@@ -17,7 +17,7 @@ public class MemberService {
 	private MemberService () {};
 	public static MemberService getInstance() {
 		if(instance == null)instance = new MemberService();
-		return instance asasd;
+		return instance;
 	}
 
 	Map<String, Object> sessionStorage = Controller.sessionStorage;
