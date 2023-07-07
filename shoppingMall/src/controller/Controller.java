@@ -36,7 +36,7 @@ public class Controller {
 		int choice = Menu.HOME;
 		
 		while(true) {
-			switch(choice) {
+			switch(choice ) {
 			// 메인메뉴
 			case Menu.HOME :
 				choice = home();
